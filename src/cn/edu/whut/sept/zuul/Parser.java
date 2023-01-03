@@ -7,12 +7,18 @@ public class Parser
     private CommandWords commands;
     private Scanner reader;
 
+    /**
+     * 创建解析器和输入流.
+     */
     public Parser()
     {
         commands = new CommandWords();
         reader = new Scanner(System.in);
     }
 
+    /**
+     * 读取用户输入命令.
+     */
     public Command getCommand()
     {
         String inputLine;
@@ -24,12 +30,18 @@ public class Parser
         inputLine = reader.nextLine();
 
         Scanner tokenizer = new Scanner(inputLine);
-        if(tokenizer.hasNext()) {
-            word1 = tokenizer.next();   
+        try{
             if(tokenizer.hasNext()) {
-                word2 = tokenizer.next();
+                word1 = tokenizer.next();
+                if(tokenizer.hasNext()) {
+                    word2 = tokenizer.next();
+                }
             }
+        } catch (Exception e) {
+        } finally {
+            tokenizer.close();
         }
+
 
         if(commands.isCommand(word1)) {
             return new Command(word1, word2);
@@ -39,6 +51,9 @@ public class Parser
         }
     }
 
+    /**
+     * 向用户输出命令列表.
+     */
     public void showCommands()
     {
         commands.showAll();

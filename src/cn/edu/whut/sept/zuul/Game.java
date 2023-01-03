@@ -13,16 +13,20 @@
  */
 package cn.edu.whut.sept.zuul;
 
+import java.util.Stack;
+
 public class Game
 {
     private Parser parser;
     private Room currentRoom;
+    private Stack<Room> roomStack;
 
     /**
      * 创建游戏并初始化内部数据和解析器.
      */
     public Game()
     {
+        roomStack = new Stack<Room>();
         createRooms();
         parser = new Parser();
     }
@@ -33,6 +37,7 @@ public class Game
     private void createRooms()
     {
         Room outside, theater, pub, lab, office;
+        Goods computer, pen, chair, desk, projector, piano, basketball, soccer, beer, whisky;
 
         // create the rooms
         outside = new Room("outside the main entrance of the university");
@@ -40,6 +45,19 @@ public class Game
         pub = new Room("in the campus pub");
         lab = new Room("in a computing lab");
         office = new Room("in the computing admin office");
+
+        //create the goods
+        computer = new Goods("computer", 100);
+        pen = new Goods("pen", 10);
+        chair = new Goods("chair", 50);
+        desk = new Goods("desk", 80);
+        projector = new Goods("projector", 150);
+        piano = new Goods("piano", 300);
+        basketball = new Goods("basketball", 40);
+        soccer = new Goods("soccer", 30);
+        beer = new Goods("beer", 20);
+        whisky = new Goods("whisky", 30);
+
 
         // initialise room exits
         outside.setExit("east", theater);
@@ -55,7 +73,24 @@ public class Game
 
         office.setExit("west", lab);
 
+        // initialise room goods
+        outside.setGoods(basketball);
+        outside.setGoods(soccer);
+
+        theater.setGoods(piano);
+
+        pub.setGoods(beer);
+        pub.setGoods(whisky);
+
+        lab.setGoods(computer);
+        lab.setGoods(pen);
+        lab.setGoods(projector);
+
+        office.setGoods(chair);
+        office.setGoods(desk);
+
         currentRoom = outside;  // start game outside
+        roomStack.add(currentRoom);
     }
 
     /**
@@ -98,13 +133,15 @@ public class Game
     {
         boolean wantToQuit = false;
 
+
+
         if(command.isUnknown()) {
             System.out.println("I don't know what you mean...");
             return false;
         }
 
         String commandWord = command.getCommandWord();
-        if (commandWord.equals("help")) {
+        if(commandWord.equals("help")) {
             printHelp();
         }
         else if (commandWord.equals("go")) {
@@ -113,6 +150,13 @@ public class Game
         else if (commandWord.equals("quit")) {
             wantToQuit = quit(command);
         }
+        else if (commandWord.equals("look")) {
+            printGoods();
+        }
+        else if (commandWord.equals("back")) {
+            backRoom();
+        }
+
         // else command not recognised.
         return wantToQuit;
     }
@@ -154,6 +198,7 @@ public class Game
         }
         else {
             currentRoom = nextRoom;
+            roomStack.add(currentRoom);
             System.out.println(currentRoom.getLongDescription());
         }
     }
@@ -171,5 +216,26 @@ public class Game
         else {
             return true;  // signal that we want to quit
         }
+    }
+
+    /**
+     * 执行look指令，在终端打印游戏物品信息.
+     * 此处会输出当前房间中所有的物品列表
+     */
+    private void printGoods()
+    {
+        System.out.println(currentRoom.getLongDescription());
+        System.out.println(currentRoom.getGoodString());
+    }
+
+    private void backRoom()
+    {
+        if (! roomStack.empty()) {
+            roomStack.pop();
+            if (! roomStack.empty()) {
+                currentRoom = roomStack.peek();
+            }
+        }
+        System.out.println(currentRoom.getLongDescription());
     }
 }
